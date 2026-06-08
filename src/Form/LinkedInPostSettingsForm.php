@@ -5,7 +5,7 @@ namespace Drupal\social_post_linkedin\Form;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Routing\RequestContext;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -14,34 +14,21 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class LinkedInPostSettingsForm extends ConfigFormBase {
 
   /**
-   * The request context.
-   *
-   * @var \Drupal\Core\Routing\RequestContext
-   */
-  protected $requestContext;
-
-  /**
    * Constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The configuration factory.
-   * @param \Drupal\Core\Routing\RequestContext $request_context
-   *   Holds information about the current request.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, RequestContext $request_context) {
+  public function __construct(ConfigFactoryInterface $config_factory) {
     parent::__construct($config_factory);
-    $this->requestContext = $request_context;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    // Instantiates this class.
     return new static(
-    // Load the services required to construct this class.
-      $container->get('config.factory'),
-      $container->get('router.request_context')
+      $container->get('config.factory')
     );
   }
 
@@ -93,7 +80,7 @@ class LinkedInPostSettingsForm extends ConfigFormBase {
       '#disabled' => TRUE,
       '#title' => $this->t('Valid OAuth redirect URIs'),
       '#description' => $this->t('Copy this value to <em>Valid OAuth redirect URIs</em> field of your LinkedIn App settings.'),
-      '#default_value' => $GLOBALS['base_url'] . '/user/social-post/linkedin/auth/callback',
+      '#default_value' => Url::fromRoute('social_post_linkedin.callback', [], ['absolute' => TRUE])->toString(),
     ];
 
     return parent::buildForm($form, $form_state);

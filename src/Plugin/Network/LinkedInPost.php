@@ -2,6 +2,7 @@
 
 namespace Drupal\social_post_linkedin\Plugin\Network;
 
+use Drupal\Core\Url;
 use Drupal\social_api\SocialApiException;
 use Drupal\social_post\Plugin\Network\NetworkBase;
 use Drupal\social_post_linkedin\Settings\LinkedInPostSettings;
@@ -48,7 +49,7 @@ class LinkedInPost extends NetworkBase {
       $league_settings = [
         'clientId' => $settings->getClientId(),
         'clientSecret' => $settings->getClientSecret(),
-        'redirectUri' => $GLOBALS['base_url'] . '/user/social-post/linkedin/auth/callback',
+        'redirectUri' => Url::fromRoute('social_post_linkedin.callback', [], ['absolute' => TRUE])->toString(),
       ];
 
       return new LinkedIn($league_settings);
