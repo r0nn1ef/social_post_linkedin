@@ -34,7 +34,7 @@ class LinkedInPostManager extends OAuth2Manager {
                               LoggerChannelFactoryInterface $logger_factory,
                               RequestStack $request_stack) {
 
-    parent::__construct($config_factory->get('social_auth_dropbox.settings'),
+    parent::__construct($config_factory->get('social_post_linkedin.settings'),
                         $logger_factory,
                         $request_stack->getCurrentRequest());
   }
@@ -52,8 +52,9 @@ class LinkedInPostManager extends OAuth2Manager {
    */
   public function getAuthorizationUrl() {
     $scopes = [
-      'r_liteprofile',
-      'r_emailaddress',
+      'openid',
+      'profile',
+      'email',
       'w_member_social',
     ];
 
@@ -127,7 +128,7 @@ class LinkedInPostManager extends OAuth2Manager {
       $this->accessToken
     );
 
-    $body = \GuzzleHttp\Psr7\stream_for($this->status);
+    $body = \GuzzleHttp\Psr7\Utils::streamFor($this->status);
 
     $request = $request->withAddedHeader('Content-Type', 'application/json')
       ->withAddedHeader('X-Restli-Protocol-Version', '2.0.0')

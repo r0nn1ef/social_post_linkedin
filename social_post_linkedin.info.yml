@@ -1,7 +1,7 @@
 name: Social Post LinkedIn
 type: module
 description: Social Post integration for LinkedIn
-core: 8.x
+core_version_requirement: ^10 || ^11
 package: Social
 configure: social_post_linkedin.settings_form
 dependencies:
