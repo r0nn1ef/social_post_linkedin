@@ -1,5 +1,5 @@
 {
-    "name": "drupal/social_post_linkedin",
+    "name": "r0nn1ef/social_post_linkedin",
     "type": "drupal-module",
     "description": "Social Post integration for LinkedIn",
     "keywords": ["Drupal"],
