@@ -42,7 +42,7 @@ class LinkedInPostManager extends OAuth2Manager {
   /**
    * {@inheritdoc}
    */
-  public function authenticate() {
+  public function authenticate(): void {
     $this->setAccessToken($this->client->getAccessToken('authorization_code',
       ['code' => $this->request->get('code')]));
   }
@@ -50,7 +50,7 @@ class LinkedInPostManager extends OAuth2Manager {
   /**
    * {@inheritdoc}
    */
-  public function getAuthorizationUrl() {
+  public function getAuthorizationUrl(): mixed {
     $scopes = [
       'openid',
       'profile',
@@ -66,7 +66,7 @@ class LinkedInPostManager extends OAuth2Manager {
   /**
    * {@inheritdoc}
    */
-  public function getUserInfo() {
+  public function getUserInfo(): mixed {
     if (!$this->user) {
       $this->user = $this->client->getResourceOwner($this->getAccessToken());
     }
@@ -77,7 +77,7 @@ class LinkedInPostManager extends OAuth2Manager {
   /**
    * {@inheritdoc}
    */
-  public function getState() {
+  public function getState(): string {
     return $this->client->getState();
   }
 
