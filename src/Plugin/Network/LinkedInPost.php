@@ -34,7 +34,7 @@ class LinkedInPost extends NetworkBase {
    * @throws \Drupal\social_api\SocialApiException
    *   If the SDK library does not exist.
    */
-  protected function initSdk() {
+  protected function initSdk(): mixed {
 
     $class_name = '\League\OAuth2\Client\Provider\LinkedIn';
     if (!class_exists($class_name)) {
