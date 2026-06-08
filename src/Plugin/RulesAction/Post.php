@@ -3,12 +3,13 @@
 namespace Drupal\social_post_linkedin\Plugin\RulesAction;
 
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Routing\UrlGeneratorTrait;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\rules\Core\RulesActionBase;
+use Drupal\social_post_linkedin\LinkedInPostManager;
 use Drupal\social_post_linkedin\Plugin\Network\LinkedInPostInterface;
+use Drupal\social_post_linkedin\Post;
+use Drupal\social_post\User\UserManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\social_post\SocialPostManager;
 
 /**
  * Provides a 'Post' action.
@@ -27,14 +28,19 @@ use Drupal\social_post\SocialPostManager;
  */
 class Post extends RulesActionBase implements ContainerFactoryPluginInterface {
 
-  use UrlGeneratorTrait;
+  /**
+   * The social post user manager.
+   *
+   * @var \Drupal\social_post\User\UserManager
+   */
+  protected $userManager;
 
   /**
-   * The social post manager.
+   * The LinkedIn post manager.
    *
-   * @var \Drupal\social_post\SocialPostManager
+   * @var \Drupal\social_post_linkedin\LinkedInPostManager
    */
-  protected $postManager;
+  protected $linkedInPostManager;
 
   /**
    * The Social Post LinkedIn Network plugin.
@@ -54,15 +60,15 @@ class Post extends RulesActionBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    /* @var \Drupal\social_post_linkedin\Plugin\Network\LinkedInPostInterface $linkedin_post*/
     $linkedin_post = $container->get('plugin.network.manager')->createInstance('social_post_linkedin');
 
     return new static(
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('social_post.post_manager'),
+      $container->get('social_post.user_manager'),
       $container->get('current_user'),
+      $container->get('linkedin_post.manager'),
       $linkedin_post
     );
   }
@@ -76,26 +82,28 @@ class Post extends RulesActionBase implements ContainerFactoryPluginInterface {
    *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\social_post\SocialPostManager $post_manager
-   *   The Social Post manager.
+   * @param \Drupal\social_post\User\UserManager $user_manager
+   *   The Social Post user manager.
    * @param \Drupal\Core\Session\AccountInterface $current_user
    *   The current user.
+   * @param \Drupal\social_post_linkedin\LinkedInPostManager $linkedin_post_manager
+   *   The LinkedIn post manager.
    * @param \Drupal\social_post_linkedin\Plugin\Network\LinkedInPostInterface $linkedin_post
-   *   Used to manage authentication methods.
+   *   The LinkedIn network plugin.
    */
   public function __construct(array $configuration,
                               $plugin_id,
                               $plugin_definition,
-                              SocialPostManager $post_manager,
+                              UserManager $user_manager,
                               AccountInterface $current_user,
+                              LinkedInPostManager $linkedin_post_manager,
                               LinkedInPostInterface $linkedin_post) {
 
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->postManager = $post_manager;
+    $this->userManager = $user_manager;
     $this->currentUser = $current_user;
+    $this->linkedInPostManager = $linkedin_post_manager;
     $this->linkedInPost = $linkedin_post;
-
-    $this->postManager->setPluginId('social_post_linkedin');
   }
 
   /**
@@ -105,12 +113,19 @@ class Post extends RulesActionBase implements ContainerFactoryPluginInterface {
    *   The Post text.
    */
   protected function doExecute($status) {
-    $accounts = $this->postManager->getAccountsByUserId('social_post_linkedin', $this->currentUser->id());
+    $client = $this->linkedInPost->getSdk();
+    if (!$client) {
+      return;
+    }
 
-    /* @var \Drupal\social_post\Entity\SocialPost $account */
+    $this->linkedInPostManager->setClient($client);
+
+    $accounts = $this->userManager->getAccounts('social_post_linkedin', $this->currentUser->id());
+
+    /** @var \Drupal\social_post\Entity\SocialPost $account */
     foreach ($accounts as $account) {
-      $access_token = $this->postManager->getToken($account->getProviderUserId());
-      $this->linkedInPost->doPost($access_token, $status);
+      $post = new Post($status, $account->getProviderUserId());
+      $this->linkedInPostManager->doPost($account->getToken(), $post);
     }
   }
 

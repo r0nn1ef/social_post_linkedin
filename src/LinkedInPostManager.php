@@ -2,7 +2,7 @@
 
 namespace Drupal\social_post_linkedin;
 
-use Drupal\Core\Config\ConfigFactory;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\social_api\SocialApiException;
 use Drupal\social_post\PostManager\OAuth2Manager;
@@ -30,7 +30,7 @@ class LinkedInPostManager extends OAuth2Manager {
    * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
    *   Used to get the authorization code from the callback request.
    */
-  public function __construct(ConfigFactory $config_factory,
+  public function __construct(ConfigFactoryInterface $config_factory,
                               LoggerChannelFactoryInterface $logger_factory,
                               RequestStack $request_stack) {
 
