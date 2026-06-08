@@ -13,7 +13,7 @@
     "require" : {
         "drupal/core": "^10 || ^11",
         "league/oauth2-linkedin": "^5.1.1",
-        "drupal/social_auth": "^2.0"
+        "drupal/social_auth": "^4.0"
     },
     "authors": [
         {
